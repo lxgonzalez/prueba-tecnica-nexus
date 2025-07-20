@@ -86,28 +86,28 @@ export function usePayPal(props: UsePayPalProps = {}) {
                 });
             }
 
-            // if (formData && formData.phone && formData.nombre && formData.product_id && formData.product_nombre && formData.precio) {
-            //     try {
-            //         const messageResult = await sendMessage(
-            //             formData.phone,
-            //             formData.nombre,
-            //             formData.product_nombre,
-            //             formData.precio
-            //         );
+            if (formData && formData.phone && formData.nombre && formData.product_id && formData.product_nombre && formData.precio) {
+                try {
+                    const messageResult = await sendMessage(
+                        formData.phone,
+                        formData.nombre,
+                        formData.product_nombre,
+                        formData.precio
+                    );
 
-            //         if (messageResult.success) {
-            //             alert(`¡Pago completado! Se ha enviado un mensaje de confirmación a ${formData.phone}`);
-            //         } else {
-            //             alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
-            //             console.error("Error enviando mensaje:", messageResult.error);
-            //         }
-            //     } catch (messageError) {
-            //         console.error("Error enviando mensaje de confirmación:", messageError);
-            //         alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
-            //     }
-            // } else {
-            //     alert("¡Pago completado exitosamente!");
-            // }
+                    if (messageResult.success) {
+                        alert(`¡Pago completado! Se ha enviado un mensaje de confirmación a ${formData.phone}`);
+                    } else {
+                        alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
+                        console.error("Error enviando mensaje:", messageResult.error);
+                    }
+                } catch (messageError) {
+                    console.error("Error enviando mensaje de confirmación:", messageError);
+                    alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
+                }
+            } else {
+                alert("¡Pago completado exitosamente!");
+            }
 
             if (resetForm) {
                 resetForm();
