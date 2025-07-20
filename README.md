@@ -1,69 +1,179 @@
-# React + TypeScript + Vite
+# 💳 Sistema de Compras Nexus - Prueba Técnica
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema completo de e-commerce con integración de pagos PayPal, notificaciones WhatsApp y panel administrativo desarrollado para Nexus Soluciones.
+#### URL de prueba: https://prueba-tecnica-nexus.netlify.app/
 
-Currently, two official plugins are available:
+## 📋 Instrucciones de la Prueba Técnica
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. 🛒 Simulación de compra
+- ✅ **Página web con formulario**: nombre del cliente, producto, monto
+- ✅ **Botón "Pagar"** integrado con PayPal
 
-## Expanding the ESLint configuration
+### 2. 💰 Simulación de integración de pago
+- ✅ **Integración real con PayPal** (cuenta sandbox gratuita)
+- ✅ **Estado del pago** guardado en base de datos (pagado/pendiente)
+- ✅ **Base de datos Supabase** para persistencia
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. 🔧 Panel administrativo
+- ✅ **Vista de compras** con todas las transacciones
+- ✅ **Filtro por estado** (Todos, Pendientes, Pagados)
+- ✅ **Descarga de reportes en PDF** con información detallada
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 4. 🎁 Bonus: Automatización por WhatsApp
+- ✅ **Integración con Twilio** para envío automático de mensajes
+- ✅ **Confirmación por WhatsApp** al completar el pago
+- ✅ **Mensajes personalizados** con datos de la compra
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Tecnologías Utilizadas
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **Estilos**: Tailwind CSS v4 con tema personalizado
+- **Base de Datos**: Supabase (PostgreSQL)
+- **Autenticación**: Supabase Auth con email y Google
+- **Pagos**: PayPal SDK
+- **Notificaciones**: Twilio API (WhatsApp)
+- **PDFs**: jsPDF + autoTable
+
+## ⚙️ Configuración del Proyecto Local
+
+### Prerrequisitos
+- Node.js 18+
+- Cuenta Supabase
+- Cuenta PayPal Developer (Sandbox)
+- Cuenta Twilio (opcional para WhatsApp)
+
+### Variables de Entorno
+Crear archivo `.env` en la raíz:
+
+```env
+VITE_SUPABASE_URL=tu_supabase_url
+VITE_SUPABASE_ANON_KEY=tu_supabase_anon_key
+VITE_PAYPAL_CLIENT_ID=tu_paypal_client_id
+VITE_TWILIO_ACCOUNT_SID=tu_twilio_account_sid
+VITE_TWILIO_AUTH_TOKEN=tu_twilio_auth_token
+VITE_TWILIO_PHONE_NUMBER=whatsapp:+123456789
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Instalación
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Clonar repositorio
+git clone https://github.com/lxgonzalez/prueba-tecnica-nexus.git
+cd prueba-tecnica-nexus
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+
+# Ejecutar en desarrollo
+npm run dev
 ```
+
+### Configuración de Base de Datos (Supabase)
+
+1. **Crear tabla `compra`**:
+```sql
+
+CREATE TABLE public.compra (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  fecha timestamp without time zone DEFAULT now(),
+  total numeric NOT NULL,
+  estado text DEFAULT 'pendiente'::text,
+  telefono text NOT NULL,
+  product_id uuid,
+  paypal_transaction_id text,
+  user_name text,
+  CONSTRAINT compra_pkey PRIMARY KEY (id),
+  CONSTRAINT compra_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.productos(id)
+);
+CREATE TABLE public.productos (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  title text NOT NULL,
+  description text,
+  price numeric NOT NULL,
+  stock integer DEFAULT 0,
+  image_url text,
+  CONSTRAINT productos_pkey PRIMARY KEY (id)
+);
+```
+
+### Configuración PayPal
+
+1. Crear cuenta en [PayPal Developer](https://developer.paypal.com/)
+2. Crear aplicación Sandbox
+3. Obtener Client ID para sandbox
+4. Agregar Client ID a `.env`
+
+### Configuración Twilio (Opcional)
+
+1. Crear cuenta en [Twilio](https://www.twilio.com/)
+2. Configurar WhatsApp Sandbox
+3. Obtener credenciales y agregar a `.env`
+
+## 🏗️ Arquitectura del Proyecto
+
+```
+src/
+├── App.tsx              # Componente principal y router
+├── components/          # Componentes React reutilizables
+├── constants/           # Constantes de la aplicación
+├── hooks/               # Custom Hooks para lógica reutilizable
+├── pages/               # Páginas principales de la aplicación
+│   ├── AuthForm.tsx     # Página de login y registro
+│   ├── ComprasPage.tsx  # Panel administrativo de compras
+│   └── FormPage.tsx     # Página de formulario de compra
+├── service/             # Clientes de servicios externos
+└── types/               # Definiciones TypeScript
+```
+
+### 🎯 Principios de Arquitectura
+
+- **Clean Architecture**: Separación clara de responsabilidades
+- **Custom Hooks Pattern**: Lógica reutilizable y testeable
+- **TypeScript First**: Tipado estricto para mayor confiabilidad
+- **Component Composition**: Componentes pequeños y especializados
+- **Service Layer**: Abstracción de servicios externos
+- **Constants Management**: Centralización de configuraciones
+
+
+## 📊 Testing y Uso
+
+### 🌐 Demo en Vivo
+**URL de prueba**: [https://prueba-tecnica-nexus.netlify.app/](https://prueba-tecnica-nexus.netlify.app/)
+
+### 👨‍💼 Acceso al Panel Administrativo
+- **Email**: admin@gmail.com
+- **Contraseña**: admin123
+
+### 🛍️ Usuario de Prueba para Compras
+- **Email**: gerencia@solucionesnexus.com
+- **Contraseña**: gerencia123
+- **Alternativa**: Crear cuenta nueva con Google OAuth
+
+### Datos de Prueba PayPal (Sandbox)
+- **Email**: sb-u211244822245@personal.example.com
+- **Contraseña**: ,!7xNcn<
+
+### Flujo de Prueba Completo
+1. **Acceder a la demo**: [prueba-tecnica-nexus.netlify.app](https://prueba-tecnica-nexus.netlify.app/)
+2. **Para comprar**: 
+   - Usar credenciales `gerencia@solucionesnexus.com` / `gerencia123`
+   - O crear cuenta nueva con Google
+3. **Completar formulario** de compra con datos reales
+4. **Procesar pago** con credenciales PayPal Sandbox
+5. **Verificar mensaje WhatsApp** (si está configurado)
+6. **Acceder al panel admin** con `admin@gmail.com` / `admin123`
+7. **Revisar compras** y usar filtros por estado
+8. **Generar reporte PDF** con las compras filtradas
+
+
+## 📞 Contacto
+
+**Desarrollador**: Luis González  
+**Email**: luisgx15@gmail.com
+**GitHub**: [@lxgonzalez](https://github.com/lxgonzalez)
+
+---
+
