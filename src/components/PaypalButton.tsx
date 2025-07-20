@@ -13,7 +13,8 @@ export function PayPalButton({ isFormValid, precio }: PayPalWrapperProps) {
         <div className={`transition-opacity duration-300 ${!isFormValid ? "opacity-50 pointer-events-none" : ""}`}>
             <PayPalButtons
                 disabled={!isFormValid}
-                style={{ layout: "vertical" }}
+                fundingSource="paypal"
+                style={{ layout: "vertical", color: "black", shape: 'pill', label: 'pay' }}
                 createOrder={createOrder(precio)}
                 onApprove={onApprove}
                 onError={onError}
