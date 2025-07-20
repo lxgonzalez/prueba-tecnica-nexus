@@ -4,6 +4,7 @@ import type { Producto } from "../types/Product";
 interface FormData {
     nombre: string;
     productos: string;
+    productId: string;
     precio: string;
     phone: string;
 }
@@ -12,6 +13,7 @@ export function useForm() {
     const [form, setForm] = useState<FormData>({
         nombre: "",
         productos: "",
+        productId: "",
         precio: "",
         phone: "",
     });
@@ -20,6 +22,7 @@ export function useForm() {
         form.nombre.trim() !== "" &&
         form.phone.trim() !== "" &&
         form.productos.trim() !== "" &&
+        form.productId.trim() !== "" &&
         form.precio.trim() !== "" &&
         parseFloat(form.precio) > 0;
 
@@ -32,12 +35,13 @@ export function useForm() {
         setForm((prev) => ({
             ...prev,
             productos: producto.title,
+            productId: producto.id,
             precio: producto.price.toString(),
         }));
     };
 
     const resetForm = () => {
-        setForm({ nombre: "", productos: "", precio: "", phone: "" });
+        setForm({ nombre: "", productos: "", productId: "", precio: "", phone: "" });
     };
 
     return {

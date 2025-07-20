@@ -1,10 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useTwilio } from "./useTwilio";
 
 interface PayPalFormData {
     phone: string;
     nombre: string;
-    productos: string;
+    product_id: string;
+    product_nombre: string;
     precio: string;
 }
 
@@ -18,58 +19,100 @@ export function usePayPal(props: UsePayPalProps = {}) {
     const { onPaymentSuccess, onPaymentError, resetForm } = props;
     const { sendMessage } = useTwilio();
 
-    const createOrder = useCallback((precio: string) => {
-        return (_data: any, actions: any) => {
-            return actions.order.create({
-                intent: "CAPTURE",
-                purchase_units: [
-                    {
-                        amount: {
-                            currency_code: "USD",
-                            value: precio,
-                        },
-                    },
-                ],
-            });
-        };
-    }, []);
+    const currentCompraId = useRef<string | null>(null);
 
-    const onApprove = useCallback(async (_data: any, actions: any, formData?: PayPalFormData) => {
+
+    const createOrder = useCallback(
+        (precio: string, formData: PayPalFormData | undefined, createCompra: Function) => {
+            return async (_data: any, actions: any) => {
+                try {
+                    const compraData = {
+                        fecha: new Date().toISOString(),
+                        total: Number(precio),
+                        estado: "pendiente",
+                        telefono: formData?.phone ?? "",
+                        product_id: formData?.product_id ?? "",
+                        user_name: formData?.nombre ?? "",
+                    };
+                    const compraCreada = await createCompra(compraData);
+                    currentCompraId.current = compraCreada.id;
+
+                    return actions.order.create({
+                        intent: "CAPTURE",
+                        purchase_units: [
+                            {
+                                amount: {
+                                    currency_code: "USD",
+                                    value: precio,
+                                },
+                            },
+                        ],
+                    });
+                } catch (error) {
+                    console.error("Error al crear la compra antes de la orden PayPal", error);
+                    currentCompraId.current = null;
+                    throw error;
+                }
+            };
+        },
+        []
+    );
+
+
+    const onApprove = useCallback(async (_data: any, actions: any, formData?: PayPalFormData, markAsPaid?: Function) => {
         try {
             const details = await actions.order!.capture();
-            
+
             console.log("Detalles de la transacción:", details);
-            
-            // Enviar mensaje de confirmación si tenemos los datos del formulario
-            if (formData && formData.phone && formData.nombre && formData.productos && formData.precio) {
+            const paypalTransactionId = details.id || details.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+            if (currentCompraId.current && markAsPaid && paypalTransactionId) {
                 try {
-                    const messageResult = await sendMessage(
-                        formData.phone, 
-                        formData.nombre, 
-                        formData.productos, 
-                        formData.precio
-                    );
-                    
-                    if (messageResult.success) {
-                        alert(`¡Pago completado! Se ha enviado un mensaje de confirmación a ${formData.phone}`);
+                    const updateResult = await markAsPaid(currentCompraId.current, paypalTransactionId);
+
+                    if (updateResult) {
+                        console.log('Compra actualizada exitosamente a estado "pagado"');
                     } else {
-                        alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
-                        console.error("Error enviando mensaje:", messageResult.error);
+                        console.warn('No se pudo actualizar el estado de la compra');
                     }
-                } catch (messageError) {
-                    console.error("Error enviando mensaje de confirmación:", messageError);
-                    alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
+                } catch (updateError) {
+                    console.error('Error actualizando estado de compra:', updateError);
+                    // No lanzamos el error porque el pago ya se procesó
                 }
             } else {
-                alert("¡Pago completado exitosamente!");
+                console.warn('Faltan datos para actualizar compra:', {
+                    compraId: currentCompraId.current,
+                    markAsPaid: !!markAsPaid,
+                    paypalTransactionId
+                });
             }
 
-            // Limpiar formulario después del pago exitoso
+            // if (formData && formData.phone && formData.nombre && formData.product_id && formData.product_nombre && formData.precio) {
+            //     try {
+            //         const messageResult = await sendMessage(
+            //             formData.phone,
+            //             formData.nombre,
+            //             formData.product_nombre,
+            //             formData.precio
+            //         );
+
+            //         if (messageResult.success) {
+            //             alert(`¡Pago completado! Se ha enviado un mensaje de confirmación a ${formData.phone}`);
+            //         } else {
+            //             alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
+            //             console.error("Error enviando mensaje:", messageResult.error);
+            //         }
+            //     } catch (messageError) {
+            //         console.error("Error enviando mensaje de confirmación:", messageError);
+            //         alert("Pago completado, pero hubo un error enviando el mensaje de confirmación.");
+            //     }
+            // } else {
+            //     alert("¡Pago completado exitosamente!");
+            // }
+
             if (resetForm) {
                 resetForm();
             }
 
-            // Callback personalizado para el éxito del pago
             if (onPaymentSuccess) {
                 onPaymentSuccess(details);
             }
@@ -78,11 +121,11 @@ export function usePayPal(props: UsePayPalProps = {}) {
         } catch (error) {
             console.error("Error procesando el pago:", error);
             alert("Error al procesar el pago. Por favor, intenta nuevamente.");
-            
+
             if (onPaymentError) {
                 onPaymentError(error);
             }
-            
+
             throw error;
         }
     }, [sendMessage, resetForm, onPaymentSuccess, onPaymentError]);
@@ -90,7 +133,7 @@ export function usePayPal(props: UsePayPalProps = {}) {
     const onError = useCallback((err: any) => {
         console.error("Error en PayPal:", err);
         alert("Error al procesar el pago. Intenta nuevamente.");
-        
+
         if (onPaymentError) {
             onPaymentError(err);
         }

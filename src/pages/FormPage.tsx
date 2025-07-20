@@ -57,7 +57,8 @@ export function FormPage() {
                     formData={{
                         phone: form.phone,
                         nombre: form.nombre,
-                        productos: form.productos,
+                        product_id: form.productId,
+                        product_nombre: form.productos,
                         precio: form.precio
                     }}
                     onPaymentSuccess={resetForm}
