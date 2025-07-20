@@ -113,30 +113,7 @@ CREATE TABLE public.productos (
 3. Obtener credenciales y agregar a `.env`
 
 ## 🏗️ Arquitectura del Proyecto
-
-```
-src/
-├── App.tsx              # Componente principal y router
-├── components/          # Componentes React reutilizables
-├── constants/           # Constantes de la aplicación
-├── hooks/               # Custom Hooks para lógica reutilizable
-├── pages/               # Páginas principales de la aplicación
-│   ├── AuthForm.tsx     # Página de login y registro
-│   ├── ComprasPage.tsx  # Panel administrativo de compras
-│   └── FormPage.tsx     # Página de formulario de compra
-├── service/             # Clientes de servicios externos
-└── types/               # Definiciones TypeScript
-```
-
-### 🎯 Principios de Arquitectura
-
-- **Clean Architecture**: Separación clara de responsabilidades
-- **Custom Hooks Pattern**: Lógica reutilizable y testeable
-- **TypeScript First**: Tipado estricto para mayor confiabilidad
-- **Component Composition**: Componentes pequeños y especializados
-- **Service Layer**: Abstracción de servicios externos
-- **Constants Management**: Centralización de configuraciones
-
+<img width="759" height="752" alt="image" src="https://github.com/user-attachments/assets/897bab4c-56ca-449b-af39-3ec3e79ede2e" />
 
 ## 📊 Testing y Uso
 
