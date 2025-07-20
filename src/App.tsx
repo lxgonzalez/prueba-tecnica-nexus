@@ -1,14 +1,40 @@
-import { FormPage } from "./pages/FormPage"
+import { useAuth } from './hooks/useAuth'
+import { AuthForm } from './pages/AuthForm'
+import { FormPage } from './pages/FormPage'
+import { LogoutButton } from './components/LogoutButton'
+export default function App() {
+  const { session, user, loading } = useAuth()
 
-function App() {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-500 to-blue-300 flex items-center justify-center">
+        <AuthForm />
+      </div>
+    )
+  }
 
   return (
-    <>
-      <div className="bg-background w-vh h-dvh flex items-center justify-center">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-blue-900 via-blue-500 to-blue-300">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-surface">
+          Bienvenido, {user?.email}
+        </h2>
+        <LogoutButton />
+      </div>
+      <div className='flex flex-col justify-center items-center'>
         <FormPage />
       </div>
-    </>
+    </div>
   )
 }
-
-export default App

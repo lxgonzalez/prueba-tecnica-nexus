@@ -8,14 +8,15 @@ import { useForm } from "../hooks/useForm";
 import { PayPalButton } from "../components/PaypalButton";
 import { ProductLabel } from "../components/ProductLabel";
 
+
 export function FormPage() {
     const { productos, loading, error } = useProducts();
-    const { form, isFormValid, handleChange, handleProductSelect } = useForm();
+    const { form, isFormValid, handleChange, handleProductSelect, resetForm } = useForm();
 
     return (
         <PayPalScriptProvider options={initialOptions}>
-            <form className="max-w-md w-6xl p-6 bg-surface rounded-lg shadow-lg">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            <form className="max-w-md w-6xl p-6 bg-surface rounded-lg shadow-nexus-lg">
+                <h1 className="text-2xl font-bold text-nexus-gradient mb-6 text-center">
                     Formulario Compra Fácil
                 </h1>
 
@@ -24,6 +25,14 @@ export function FormPage() {
                     name="nombre"
                     value={form.nombre}
                     onChange={handleChange}
+                />
+
+                <InputField
+                    label="Teléfono (WhatsApp)"
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    type="tel"
                 />
 
                 <ComboBox<Producto>
@@ -45,7 +54,16 @@ export function FormPage() {
                 <PayPalButton
                     isFormValid={isFormValid}
                     precio={form.precio}
+                    formData={{
+                        phone: form.phone,
+                        nombre: form.nombre,
+                        productos: form.productos,
+                        precio: form.precio
+                    }}
+                    onPaymentSuccess={resetForm}
+                    onPaymentError={(error) => console.error('Error en el pago:', error)}
                 />
+
             </form>
         </PayPalScriptProvider>
     );

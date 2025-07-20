@@ -5,17 +5,20 @@ interface FormData {
     nombre: string;
     productos: string;
     precio: string;
+    phone: string;
 }
 
 export function useForm() {
     const [form, setForm] = useState<FormData>({
         nombre: "",
         productos: "",
-        precio: ""
+        precio: "",
+        phone: "",
     });
 
     const isFormValid =
         form.nombre.trim() !== "" &&
+        form.phone.trim() !== "" &&
         form.productos.trim() !== "" &&
         form.precio.trim() !== "" &&
         parseFloat(form.precio) > 0;
@@ -34,7 +37,7 @@ export function useForm() {
     };
 
     const resetForm = () => {
-        setForm({ nombre: "", productos: "", precio: "" });
+        setForm({ nombre: "", productos: "", precio: "", phone: "" });
     };
 
     return {
